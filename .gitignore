@@ -1,0 +1,57 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output of `go build`, `go run`
+/bin/
+/build/
+*.out
+
+# Test binary, coverage files
+*.test
+*.cover
+*.prof
+
+# Dependency directories (commonly used in vendor)
+/vendor/
+
+# IDE/editor files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Logs and debug files
+*.log
+*.tmp
+*.pid
+debug/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Git-specific files
+*.orig
+*.rej
+
+# Temporary files and caches
+*.bak
+*.old
+*.tmp
+*.cache/
+*.temp
+*.~undo-tree*
+
+# Project-specific
+/config/*.local.yaml
+/config/*.local.json
+.env
+
+# Test output
+/testdata/
+/tests/output/
