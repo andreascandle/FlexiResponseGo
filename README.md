@@ -1,6 +1,5 @@
 # **FlexiResponseGo**
 [![Go Report Card](https://goreportcard.com/badge/github.com/andreascandle/FlexiResponseGo)](https://goreportcard.com/report/github.com/andreascandle/FlexiResponseGo)
-[![Build Status](https://github.com/andreascandle/FlexiResponseGo/actions/workflows/go.yml/badge.svg)](https://github.com/andreascandle/FlexiResponseGo/actions)
 [![GoDoc](https://pkg.go.dev/badge/github.com/andreascandle/FlexiResponseGo.svg)](https://pkg.go.dev/github.com/andreascandle/FlexiResponseGo)
 [![Coverage Status](https://coveralls.io/repos/github/andreascandle/FlexiResponseGo/badge.svg)](https://coveralls.io/github/andreascandle/FlexiResponseGo)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -14,22 +13,53 @@
 
 ## **Streamline API Response Management in Go**
 
-FlexiResponseGo is a versatile and extensible response handling library designed for Go developers. It simplifies API response management across multiple frameworks, ensuring clean, standardized, and maintainable responses. With built-in support for logging, tracing, error handling, and metrics tracking, FlexiResponseGo empowers developers to create high-performance APIs with ease.
+FlexiResponseGo is a robust and extensible shared library for managing HTTP responses in Go projects. It standardizes response structures, integrates structured logging, and supports multiple web frameworks, including Fiber, Gin, Echo, and native HTTP. The library also includes built-in support for observability with Prometheus metrics and OpenTelemetry tracing.
+
+## **Features**
+
+- **Standardized Responses**:
+  - Unified success and error response formats across all frameworks.
+  - Supports metadata, field-specific validation errors, and trace IDs.
+
+- **Logging Integration**:
+  - Structured logging using `zap`.
+  - Automatic logging of incoming requests and outgoing responses.
+
+- **Framework Support**:
+  - Adapters for popular Go frameworks:
+    - Fiber
+    - Gin
+    - Echo
+    - Native HTTP
+
+- **Observability**:
+  - Metrics collection with Prometheus.
+  - Distributed tracing with OpenTelemetry.
+
+- **Extensibility**:
+  - Easy integration into new frameworks.
+  - Centralized configuration and dynamic updates.
 
 ---
 
 ## **Features**
+- **Standardized Responses**:
+  - Unified success and error response formats across all frameworks.
+  - Supports metadata, field-specific validation errors, and trace IDs.
+- **Logging Integration**:
+  - Structured logging using `zap`.
+  - Automatic logging of incoming requests and outgoing responses.
 - **Framework Agnostic**: Seamless integration with:
-  - [Gorilla Mux](https://github.com/gorilla/mux)
   - [Fiber](https://github.com/gofiber/fiber)
   - [Gin](https://github.com/gin-gonic/gin)
   - [Echo](https://github.com/labstack/echo)
   - [net/http](https://pkg.go.dev/net/http)
-- **Standardized Response Structures**:
-  - Unified handling for success, error, and validation responses.
 - **Observability**:
-  - Distributed tracing with [OpenTelemetry](https://opentelemetry.io/).
-  - Metrics tracking with [Prometheus](https://prometheus.io/).
+  - Metrics collection with Prometheus.
+  - Distributed tracing with OpenTelemetry.
+- **Extensibility**:
+  - Easy integration into new frameworks.
+  - Centralized configuration and dynamic updates.
 - **Advanced Error Management**:
   - Categorized errors with extensible codes and sanitization.
 - **Performance Optimized**:
@@ -47,71 +77,65 @@ Install FlexiResponseGo via `go get`:
 go get github.com/andreascandle/FlexiResponseGo
 ```
 
-## **Usage**
-### 1. Framework Integration
-#### Gorilla Mux
-```bash
-import (
-    "net/http"
-    "response/adapters"
+## **Installation**
 
-    "github.com/gorilla/mux"
-)
+```bash
+import "github.com/andreascandle/FlexiResponseGo"
+```
+
+## **Usage**
+### 1. Setup Configuration
+#### Update global settings for metadata and logging:
+```bash
+import "github.com/andreascandle/FlexiResponseGo/config"
 
 func main() {
-    router := mux.NewRouter()
-
-    router.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
-        adapters.MuxSuccessResponse(w, r, "Operation successful", map[string]string{"example": "mux"})
-    }).Methods(http.MethodGet)
-
-    http.ListenAndServe(":8080", router)
+    conf := config.GetConfig()
+    conf.UpdateMetadata("serviceName", "MyService")
+    conf.UpdateLogLevel("debug")
 }
-
 ```
-#### Fiber
+### 2. Framework-Specific Adapters
+#### Fiber Example:
 ```bash
 import (
-    "response/adapters"
-
+    "github.com/andreascandle/FlexiResponseGo/adapters"
     "github.com/gofiber/fiber/v2"
 )
 
 func main() {
     app := fiber.New()
 
-    app.Get("/success", func(c *fiber.Ctx) error {
-        return adapters.FiberSuccessResponse(c, "Operation successful", map[string]string{"example": "fiber"})
+    app.Get("/", func(c *fiber.Ctx) error {
+        return adapters.FiberSuccessResponse(c, "Welcome to FlexiResponseGo!", map[string]string{"status": "ok"})
     })
 
-    app.Listen(":8080")
+    app.Listen(":3000")
 }
 ```
-#### Gin
+#### Gin Example:
 ```bash
 import (
-    "response/adapters"
-
+    "github.com/andreascandle/FlexiResponseGo/adapters"
     "github.com/gin-gonic/gin"
 )
 
 func main() {
-    router := gin.Default()
+    r := gin.Default()
 
-    router.GET("/success", func(c *gin.Context) {
-        adapters.GinSuccessResponse(c, "Operation successful", map[string]string{"example": "gin"})
+    r.GET("/", func(c *gin.Context) {
+        adapters.GinSuccessResponse(c, "Welcome to FlexiResponseGo!", map[string]string{"status": "ok"})
     })
 
-    router.Run(":8080")
+    r.Run(":3000")
 }
-
 ```
-#### Echo
+#### Echo Example:
 ```bash
 import (
-    "response/adapters"
-
+    "github.com/andreascandle/FlexiResponseGo/adapters"
     "github.com/labstack/echo/v4"
+    "net/http"
 )
 
 func main() {
@@ -121,7 +145,7 @@ func main() {
         return adapters.EchoSuccessResponse(c, "Operation successful", map[string]string{"example": "echo"})
     })
 
-    e.Start(":8080")
+    e.Start(":3000")
 }
 ```
 #### net/http
@@ -133,7 +157,7 @@ import (
 
 func main() {
     http.HandleFunc("/success", func(w http.ResponseWriter, r *http.Request) {
-        adapters.HTTPSuccessResponse(w, r, "Operation successful", map[string]string{"example": "http"})
+        return adapters.EchoSuccessResponse(c, "Operation successful", map[string]string{"example": "echo"})
     })
 
     http.ListenAndServe(":8080", nil)
@@ -143,30 +167,46 @@ func main() {
 ### Observability
 - **Distributed Tracing:** Add tracing using OpenTelemetry.
 - **Metrics Tracking:** Export metrics to Prometheus for better API monitoring.
-
-### Folder Structure
+#### Prometheus Metrics
+Expose metrics at /metrics:
 ```bash
-response/
-  core/               # Core response handling logic
-  logger/             # Adaptive logger
-  config/             # Dynamic configuration management
-  utils/              # Utility functions (trace ID generation, sanitization)
-  adapters/           # Adapters for various frameworks
-    fiber_adapter.go  # Fiber adapter
-    gin_adapter.go    # Gin adapter
-    http_adapter.go   # net/http adapter
-    echo_adapter.go   # Echo adapter
-  observability/      # Observability tools (tracing, metrics)
-  tests/              # Tests for all components
-```
-### Contributing
-Contributions are welcome! To contribute:
+import (
+    "github.com/andreascandle/FlexiResponseGo/observability"
+    "net/http"
+)
 
+func main() {
+    http.Handle("/metrics", observability.HTTPHandlerForMetrics())
+    http.ListenAndServe(":9090", nil)
+}
+```
+#### OpenTelemetry Tracing
+Initialize tracing for your service:
+```bash
+import "github.com/andreascandle/FlexiResponseGo/observability"
+
+func main() {
+    shutdown := observability.InitTracer("MyService")
+    defer shutdown()
+}
+```
+### Testing
+Run the test suite using:
+```bash
+go test ./tests/... -v
+```
+Ensure you have all dependencies installed for full testing.
+
+### Contributing
+We welcome contributions to FlexiResponseGo! If you’d like to report an issue, suggest a feature, or submit a code change, follow the guidelines below.
+
+### How to Contribute
 - Fork the repository.
 - Create a feature branch.
 - Submit a pull request with detailed descriptions of changes.
+
 ### License
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](https://github.com/andreascandle/FlexiResponseGo/blob/main/LICENSE).
 
 ### Acknowledgments
 Special thanks to the Go developer community and contributors to:
